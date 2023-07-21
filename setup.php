@@ -56,7 +56,7 @@ function iwp_multiple_files_get_next_file($source, $raw_source, $importer_model)
         return $source;
     }
 
-    $files = iwp_multiple_files_has_available_files(dirname($source) . DIRECTORY_SEPARATOR . $config['pattern'], $raw_source);
+    $files = iwp_multiple_files_has_available_files(trailingslashit(dirname($source)) . $config['pattern'], $raw_source);
 
     if (!empty($files)) {
 
@@ -157,7 +157,7 @@ add_action('iwp/register_events', function ($event_handler) {
  */
 add_action('plugins_loaded', function () {
     // register with wp-cli if it's running, and command hasn't already been defined elsewhere
-    if (defined('WP_CLI') && WP_CLI) {
+    if (defined('WP_CLI') && \WP_CLI) {
         $command = function ($args, $assoc_args) {
 
             $importer_id = $args[0];
@@ -171,12 +171,12 @@ add_action('plugins_loaded', function () {
             $importer_model = $importer_manager->get_importer($importer_id);
 
             if (!$importer_model) {
-                WP_CLI::error('Invalid importer');
+                \WP_CLI::error('Invalid importer');
                 return;
             }
 
             if ($importer_model->getDatasource() !== 'local') {
-                WP_CLI::error('Importer does not have a local file source');
+                \WP_CLI::error('Importer does not have a local file source');
                 return;
             }
 
@@ -189,22 +189,22 @@ add_action('plugins_loaded', function () {
                     return $source;
                 }
 
-                $files = iwp_multiple_files_has_available_files(dirname($source) . DIRECTORY_SEPARATOR . $config['pattern'], $raw_source);
+                $files = iwp_multiple_files_has_available_files(trailingslashit(dirname($source)) . $config['pattern'], $raw_source);
 
                 $old_file_count = count($files);
 
                 if (empty($files)) {
-                    WP_CLI::log("All files imported");
+                    \WP_CLI::log("All files imported");
                 } else {
 
-                    WP_CLI::runcommand('importwp import ' . $importer_model->getId() . ' --start');
+                    \WP_CLI::runcommand('importwp import ' . $importer_model->getId() . ' --start');
 
-                    $files = iwp_multiple_files_has_available_files(dirname($source) . DIRECTORY_SEPARATOR . $config['pattern'], $raw_source);
-                    WP_CLI::log("Files left: " . count($files));
+                    $files = iwp_multiple_files_has_available_files(trailingslashit(dirname($source)) . $config['pattern'], $raw_source);
+                    \WP_CLI::log("Files left: " . count($files));
                 }
             } while (!empty($files) && $old_file_count != count($files));
         };
 
-        WP_CLI::add_command('importwp-process', $command);
+        \WP_CLI::add_command('importwp-process', $command);
     }
 }, 20);
