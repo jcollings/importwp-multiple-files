@@ -17,6 +17,8 @@ function iwp_multiple_files_has_available_files($source, $raw_source)
         return !in_array($item, $exclude_files);
     });
 
+    $files = array_map('wp_normalize_path', $files);
+
     return $files;
 }
 
